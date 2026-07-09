@@ -40,6 +40,7 @@ button {
 }
 
 .counter {
+  position: relative;
   width: min(1120px, 100%);
   min-height: min(720px, calc(100vh - 48px));
   display: grid;
@@ -202,6 +203,24 @@ h1 {
   animation: reaction-float .95s ease-out both;
 }
 
+.finish-effect {
+  position: absolute;
+  left: 50%;
+  top: 57%;
+  z-index: 30;
+  width: min(470px, 46%);
+  height: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.finish-effect.is-playing {
+  visibility: visible;
+  animation: finish-fade 2.5s linear both;
+}
+
 .dont-like-pop {
   left: 58%;
   top: -8%;
@@ -296,19 +315,19 @@ h1 {
   display: inline-block;
   margin-bottom: 10px;
   color: var(--counter-dark);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .speech h2 {
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: clamp(21px, 3vw, 28px);
   line-height: 1.15;
 }
 
 .speech p {
   margin-top: 12px;
   color: var(--muted);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.45;
 }
 
@@ -527,6 +546,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 2px;
+  font-size: 18px;
   white-space: nowrap;
 }
 
@@ -641,6 +661,24 @@ button b {
   }
 }
 
+@keyframes finish-fade {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  60% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 820px) {
   .game-shell {
     padding: 12px;
@@ -703,5 +741,68 @@ button b {
 
   .controls {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .game-shell {
+    width: 100vw;
+    height: 100svh;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .counter {
+    width: 1120px;
+    height: 720px;
+    min-height: 0;
+    transform: scale(var(--landscape-scale, 1));
+    transform-origin: center center;
+  }
+
+  .topbar {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .stats {
+    min-width: min(360px, 44vw);
+    width: auto;
+  }
+
+  .service-line {
+    grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.1fr);
+    padding: 28px 28px 22px;
+  }
+
+  .customer-panel {
+    grid-template-columns: 264px 1fr;
+    gap: 8px;
+  }
+
+  .customer {
+    width: 273px;
+    height: 294px;
+  }
+
+  .speech {
+    min-height: 150px;
+    padding: 18px 20px;
+  }
+
+  .bowl-area {
+    min-height: 340px;
+  }
+
+  .controls {
+    grid-template-columns: 1fr 1.3fr .85fr;
   }
 }
