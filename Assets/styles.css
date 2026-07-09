@@ -752,19 +752,31 @@ button b {
     overflow: hidden;
   }
 
+  body {
+    position: fixed;
+    inset: 0;
+    min-height: 100dvh;
+  }
+
   .game-shell {
+    position: fixed;
+    inset: 0;
     width: 100vw;
-    height: 100svh;
+    height: 100dvh;
     min-height: 0;
     padding: 0;
+    display: block;
     overflow: hidden;
   }
 
   .counter {
+    position: fixed;
+    left: var(--landscape-center-x, 50vw);
+    top: var(--landscape-center-y, 50dvh);
     width: 1120px;
     height: 720px;
     min-height: 0;
-    transform: scale(var(--landscape-scale, 1));
+    transform: translate(-50%, -50%) scale(var(--landscape-scale, 1));
     transform-origin: center center;
   }
 
