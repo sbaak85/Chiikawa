@@ -54,12 +54,32 @@ const bowlToppingImages = document.querySelectorAll("[data-bowl-topping]");
 const likeEffect = document.querySelector("#likeEffect");
 const dontLikeEffect = document.querySelector("#dontLikeEffect");
 const bgMusic = document.querySelector("#bgMusic");
+const bgmTracks = [
+  "Assets/SE/Ramen%20shop%20music1.mp3",
+  "Assets/SE/Ramen%20shop%20music2.mp3"
+];
+const soundEffects = {
+  start: new Audio("Assets/SE/%E9%96%8B%E5%A7%8B.mp3"),
+  choose: new Audio("Assets/SE/%E9%81%B8%E6%96%99.mp3"),
+  serve: new Audio("Assets/SE/%E9%80%81%E5%87%BA.mp3"),
+  clear: new Audio("Assets/SE/%E6%B8%85%E7%A9%BA.mp3"),
+  end: new Audio("Assets/SE/kabuki_yell.mp3")
+};
 const serveBtn = document.querySelector("#serveBtn");
 const clearBtn = document.querySelector("#clearBtn");
 const startBtn = document.querySelector("#startBtn");
+const bgmToggleBtn = document.querySelector("#bgmToggleBtn");
+const bgmSwitchBtn = document.querySelector("#bgmSwitchBtn");
 let previewBroth = null;
 let musicStarted = false;
 let musicPausedByFocus = false;
+let bgmEnabled = true;
+let bgmTrackIndex = 0;
+
+Object.values(soundEffects).forEach((audio) => {
+  audio.preload = "auto";
+  audio.volume = 0.8;
+});
 
 function sample(keys) {
   return keys[Math.floor(Math.random() * keys.length)];
@@ -69,9 +89,17 @@ function randomBroth() {
   return sample(Object.keys(brothImages));
 }
 
-function playBackgroundMusic() {
-  if (!bgMusic) return;
+function updateBgmButtonState() {
+  if (!bgmToggleBtn) return;
+  bgmToggleBtn.textContent = bgmEnabled ? "BGM OFF" : "BGM ON";
+}
+
+function playBackgroundMusic(restart = false) {
+  if (!bgMusic || !bgmEnabled) return;
   bgMusic.volume = 0.45;
+  if (restart) {
+    bgMusic.currentTime = 0;
+  }
 
   const playPromise = bgMusic.play();
   if (!playPromise) {
@@ -91,18 +119,63 @@ function playBackgroundMusic() {
 function stopBackgroundMusic() {
   if (!bgMusic) return;
   bgMusic.pause();
+  musicStarted = false;
 }
 
 function pauseMusicForFocusLoss() {
-  if (!bgMusic || bgMusic.paused) return;
+  if (!bgMusic || !bgmEnabled || bgMusic.paused) return;
   musicPausedByFocus = true;
   bgMusic.pause();
 }
 
 function resumeMusicAfterFocus() {
-  if (!musicPausedByFocus) return;
+  if (!musicPausedByFocus || !bgmEnabled) return;
   musicPausedByFocus = false;
   playBackgroundMusic();
+}
+
+function setBackgroundTrack(trackIndex) {
+  if (!bgMusic) return;
+  bgmTrackIndex = (trackIndex + bgmTracks.length) % bgmTracks.length;
+  bgMusic.pause();
+  bgMusic.setAttribute("src", bgmTracks[bgmTrackIndex]);
+  bgMusic.load();
+  musicStarted = false;
+}
+
+function toggleBackgroundMusic() {
+  bgmEnabled = !bgmEnabled;
+  musicPausedByFocus = false;
+
+  if (bgmEnabled) {
+    playBackgroundMusic();
+  } else {
+    stopBackgroundMusic();
+  }
+
+  updateBgmButtonState();
+}
+
+function switchBackgroundMusic() {
+  bgmEnabled = true;
+  musicPausedByFocus = false;
+  setBackgroundTrack(bgmTrackIndex + 1);
+  updateBgmButtonState();
+  playBackgroundMusic(true);
+}
+
+function playSound(name) {
+  const audio = soundEffects[name];
+  if (!audio) return;
+
+  const player = audio.cloneNode(true);
+  player.volume = audio.volume;
+  player.currentTime = 0;
+
+  const playPromise = player.play();
+  if (playPromise) {
+    playPromise.catch(() => {});
+  }
 }
 
 function makeOrder() {
@@ -209,6 +282,22 @@ function clearBowl() {
   updateBowlView();
 }
 
+function chooseBroth(brothKey) {
+  playSound("choose");
+  state.bowl.broth = brothKey;
+  updateBowlView();
+}
+
+function toggleTopping(toppingKey) {
+  playSound("choose");
+  if (state.bowl.toppings.has(toppingKey)) {
+    state.bowl.toppings.delete(toppingKey);
+  } else {
+    state.bowl.toppings.add(toppingKey);
+  }
+  updateBowlView();
+}
+
 function nextOrder() {
   state.order = makeOrder();
   clearBowl();
@@ -222,6 +311,8 @@ function isMatch() {
 }
 
 function serve() {
+  playSound("serve");
+
   if (!state.running) {
     showMessage("先按開始。", "bad");
     return;
@@ -247,6 +338,7 @@ function serve() {
 }
 
 function startGame() {
+  playSound("start");
   playBackgroundMusic();
 
   if (state.timerId) {
@@ -274,6 +366,7 @@ function startGame() {
 }
 
 function endGame() {
+  playSound("end");
   state.running = false;
   clearInterval(state.timerId);
   state.timerId = null;
@@ -288,29 +381,25 @@ function endGame() {
 
 document.querySelectorAll("[data-broth]").forEach((button) => {
   button.addEventListener("click", () => {
-    state.bowl.broth = button.dataset.broth;
-    updateBowlView();
+    chooseBroth(button.dataset.broth);
   });
 });
 
 document.querySelectorAll("[data-topping]").forEach((button) => {
   button.addEventListener("click", () => {
-    const key = button.dataset.topping;
-    if (state.bowl.toppings.has(key)) {
-      state.bowl.toppings.delete(key);
-    } else {
-      state.bowl.toppings.add(key);
-    }
-    updateBowlView();
+    toggleTopping(button.dataset.topping);
   });
 });
 
 serveBtn.addEventListener("click", serve);
 clearBtn.addEventListener("click", () => {
+  playSound("clear");
   clearBowl();
   showMessage("碗已清空。");
 });
 startBtn.addEventListener("click", startGame);
+bgmToggleBtn.addEventListener("click", toggleBackgroundMusic);
+bgmSwitchBtn.addEventListener("click", switchBackgroundMusic);
 
 document.addEventListener("pointerdown", () => {
   if (!musicStarted) playBackgroundMusic();
@@ -345,18 +434,11 @@ window.addEventListener("keydown", (event) => {
   const toppingMap = { q: "egg", w: "pork", e: "corn", a: "nori" };
 
   if (brothMap[key]) {
-    state.bowl.broth = brothMap[key];
-    updateBowlView();
+    chooseBroth(brothMap[key]);
   }
 
   if (toppingMap[key]) {
-    const topping = toppingMap[key];
-    if (state.bowl.toppings.has(topping)) {
-      state.bowl.toppings.delete(topping);
-    } else {
-      state.bowl.toppings.add(topping);
-    }
-    updateBowlView();
+    toggleTopping(toppingMap[key]);
   }
 
   if (key === "r") {
@@ -365,6 +447,7 @@ window.addEventListener("keydown", (event) => {
 });
 
 previewBroth = randomBroth();
+updateBgmButtonState();
 updateStats();
 updateBowlView();
 showOrder();
