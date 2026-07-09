@@ -4,6 +4,12 @@ const broths = {
   tonkotsu: "豚骨"
 };
 
+const brothImages = {
+  miso: "Assets/Miso-bowl.png",
+  shoyu: "Assets/soy-sauce-bowl.png",
+  tonkotsu: "Assets/pork-bone-bowl.png"
+};
+
 const toppings = {
   egg: "溏心蛋",
   pork: "叉燒",
@@ -23,10 +29,11 @@ const orderNames = [
 const state = {
   score: 0,
   combo: 0,
-  time: 75,
+  time: 60,
   running: false,
   timerId: null,
   order: null,
+  successBowls: [],
   bowl: {
     broth: null,
     toppings: new Set()
@@ -39,14 +46,63 @@ const timeEl = document.querySelector("#time");
 const orderTitleEl = document.querySelector("#orderTitle");
 const orderTextEl = document.querySelector("#orderText");
 const messageEl = document.querySelector("#message");
+const successLogEl = document.querySelector("#successLog");
+const successLogTrackEl = document.querySelector("#successLogTrack");
 const currentOrderEl = document.querySelector("#currentOrder");
-const brothView = document.querySelector("#brothView");
+const bowlImage = document.querySelector("#bowlImage");
+const bowlToppingImages = document.querySelectorAll("[data-bowl-topping]");
+const likeEffect = document.querySelector("#likeEffect");
+const dontLikeEffect = document.querySelector("#dontLikeEffect");
+const bgMusic = document.querySelector("#bgMusic");
 const serveBtn = document.querySelector("#serveBtn");
 const clearBtn = document.querySelector("#clearBtn");
 const startBtn = document.querySelector("#startBtn");
+let previewBroth = null;
+let musicStarted = false;
+let musicPausedByFocus = false;
 
 function sample(keys) {
   return keys[Math.floor(Math.random() * keys.length)];
+}
+
+function randomBroth() {
+  return sample(Object.keys(brothImages));
+}
+
+function playBackgroundMusic() {
+  if (!bgMusic) return;
+  bgMusic.volume = 0.45;
+
+  const playPromise = bgMusic.play();
+  if (!playPromise) {
+    musicStarted = true;
+    return;
+  }
+
+  playPromise
+    .then(() => {
+      musicStarted = true;
+    })
+    .catch(() => {
+      musicStarted = false;
+    });
+}
+
+function stopBackgroundMusic() {
+  if (!bgMusic) return;
+  bgMusic.pause();
+}
+
+function pauseMusicForFocusLoss() {
+  if (!bgMusic || bgMusic.paused) return;
+  musicPausedByFocus = true;
+  bgMusic.pause();
+}
+
+function resumeMusicAfterFocus() {
+  if (!musicPausedByFocus) return;
+  musicPausedByFocus = false;
+  playBackgroundMusic();
 }
 
 function makeOrder() {
@@ -75,16 +131,46 @@ function updateStats() {
   timeEl.textContent = state.time;
 }
 
-function updateBowlView() {
-  brothView.className = `broth${state.bowl.broth ? ` ${state.bowl.broth}` : ""}`;
-  document.querySelectorAll(".topping").forEach((item) => {
-    item.classList.toggle("show", state.bowl.toppings.has(item.dataset.name));
+function fitSuccessLog() {
+  if (!successLogEl || !successLogTrackEl) return;
+  const availableWidth = successLogEl.clientWidth;
+  const trackWidth = successLogTrackEl.scrollWidth;
+  const scale = trackWidth > availableWidth ? availableWidth / trackWidth : 1;
+  successLogTrackEl.style.transform = `scale(${scale})`;
+}
+
+function renderSuccessLog() {
+  if (!successLogTrackEl) return;
+  successLogTrackEl.innerHTML = "";
+  state.successBowls.forEach((brothKey) => {
+    const image = document.createElement("img");
+    image.className = "success-log-bowl";
+    image.src = brothImages[brothKey];
+    image.alt = `${broths[brothKey]}拉麵`;
+    successLogTrackEl.appendChild(image);
   });
+  requestAnimationFrame(fitSuccessLog);
+}
+
+function addSuccessBowl(brothKey) {
+  state.successBowls.push(brothKey);
+  renderSuccessLog();
+}
+
+function updateBowlView() {
+  const displayBroth = state.bowl.broth || previewBroth || "miso";
+  bowlImage.src = brothImages[displayBroth];
+  bowlImage.alt = `${broths[displayBroth]}拉麵湯頭`;
+  bowlImage.dataset.broth = displayBroth;
+
   document.querySelectorAll("[data-broth]").forEach((button) => {
     button.classList.toggle("active", button.dataset.broth === state.bowl.broth);
   });
   document.querySelectorAll("[data-topping]").forEach((button) => {
     button.classList.toggle("active", state.bowl.toppings.has(button.dataset.topping));
+  });
+  bowlToppingImages.forEach((image) => {
+    image.classList.toggle("is-visible", state.bowl.toppings.has(image.dataset.bowlTopping));
   });
 
   const brothText = state.bowl.broth ? broths[state.bowl.broth] : "未選湯底";
@@ -97,6 +183,13 @@ function updateBowlView() {
 function showMessage(text, tone = "") {
   messageEl.textContent = text;
   messageEl.className = `message ${tone}`.trim();
+}
+
+function playReaction(effectEl) {
+  if (!effectEl) return;
+  effectEl.classList.remove("is-playing");
+  void effectEl.offsetWidth;
+  effectEl.classList.add("is-playing");
 }
 
 function showOrder() {
@@ -135,13 +228,17 @@ function serve() {
   }
 
   if (isMatch()) {
+    const servedBroth = state.order.broth;
     state.combo += 1;
     state.score += 100 + Math.min(state.combo * 15, 150);
+    addSuccessBowl(servedBroth);
+    playReaction(likeEffect);
     showMessage(`正確出餐！${describeOrder(state.order)}`, "good");
     nextOrder();
   } else {
     state.combo = 0;
     state.time = Math.max(0, state.time - 5);
+    playReaction(dontLikeEffect);
     showMessage(`客人說不是這碗：要 ${describeOrder(state.order)}`, "bad");
     clearBowl();
     updateStats();
@@ -150,16 +247,20 @@ function serve() {
 }
 
 function startGame() {
+  playBackgroundMusic();
+
   if (state.timerId) {
     clearInterval(state.timerId);
   }
 
   state.score = 0;
   state.combo = 0;
-  state.time = 75;
+  state.time = 60;
+  state.successBowls = [];
   state.running = true;
   startBtn.textContent = "重新開始";
   showMessage("開店！照訂單快速出餐。");
+  renderSuccessLog();
   nextOrder();
   updateStats();
 
@@ -178,6 +279,7 @@ function endGame() {
   state.timerId = null;
   state.time = 0;
   state.order = null;
+  previewBroth = randomBroth();
   updateStats();
   showOrder();
   clearBowl();
@@ -210,9 +312,33 @@ clearBtn.addEventListener("click", () => {
 });
 startBtn.addEventListener("click", startGame);
 
+document.addEventListener("pointerdown", () => {
+  if (!musicStarted) playBackgroundMusic();
+}, { once: true });
+
+window.addEventListener("pagehide", stopBackgroundMusic);
+window.addEventListener("blur", pauseMusicForFocusLoss);
+window.addEventListener("focus", resumeMusicAfterFocus);
+window.addEventListener("resize", fitSuccessLog);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    pauseMusicForFocusLoss();
+  } else {
+    resumeMusicAfterFocus();
+  }
+});
+
 window.addEventListener("keydown", (event) => {
   if (event.target.matches("input, textarea, select, [contenteditable='true']")) return;
-  if (event.target.matches("button") && (event.code === "Space" || event.key === "Enter")) return;
+  if (!musicStarted) playBackgroundMusic();
+
+  if (event.code === "Space") {
+    event.preventDefault();
+    serve();
+    return;
+  }
+
+  if (event.target.matches("button") && event.key === "Enter") return;
 
   const key = event.key.toLowerCase();
   const brothMap = { "1": "miso", "2": "shoyu", "3": "tonkotsu" };
@@ -233,16 +359,12 @@ window.addEventListener("keydown", (event) => {
     updateBowlView();
   }
 
-  if (event.code === "Space") {
-    event.preventDefault();
-    serve();
-  }
-
   if (key === "r") {
     startGame();
   }
 });
 
+previewBroth = randomBroth();
 updateStats();
 updateBowlView();
 showOrder();
