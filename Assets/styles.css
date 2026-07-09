@@ -451,6 +451,24 @@ h1 {
   width: 30%;
 }
 
+.drop-effect {
+  position: absolute;
+  left: 50%;
+  top: -2%;
+  z-index: 7;
+  width: 26%;
+  height: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -78px) rotate(-10deg) scale(.92);
+}
+
+.drop-effect.is-playing {
+  visibility: visible;
+  animation: drop-fall 1s ease-out both;
+}
+
 .chopsticks-holder {
   position: absolute;
   left: 48%;
@@ -676,6 +694,28 @@ button b {
 
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes drop-fall {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -96px) rotate(-10deg) scale(.86);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -58px) rotate(-10deg) scale(.94);
+  }
+
+  62% {
+    opacity: 1;
+    transform: translate(-50%, 14px) rotate(-10deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 34px) rotate(-10deg) scale(1.03);
   }
 }
 
