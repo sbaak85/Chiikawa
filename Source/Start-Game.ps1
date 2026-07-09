@@ -4,7 +4,7 @@ $port = 8794
 $prefix = "http://127.0.0.1:$port/"
 
 Set-Location $root
-Write-Host "郎拉麵小遊戲"
+Write-Host "巫拉麵"
 Write-Host "網址：$prefix"
 Write-Host "按 Ctrl+C 停止。"
 

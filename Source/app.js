@@ -53,6 +53,7 @@ const bowlImage = document.querySelector("#bowlImage");
 const bowlToppingImages = document.querySelectorAll("[data-bowl-topping]");
 const likeEffect = document.querySelector("#likeEffect");
 const dontLikeEffect = document.querySelector("#dontLikeEffect");
+const finishEffect = document.querySelector("#finishEffect");
 const bgMusic = document.querySelector("#bgMusic");
 const bgmTracks = [
   "Assets/SE/Ramen%20shop%20music1.mp3",
@@ -75,6 +76,8 @@ let musicStarted = false;
 let musicPausedByFocus = false;
 let bgmEnabled = true;
 let bgmTrackIndex = 0;
+let finishEffectTimer = null;
+const landscapeLayoutQuery = window.matchMedia("(orientation: landscape) and (max-height: 560px)");
 
 Object.values(soundEffects).forEach((audio) => {
   audio.preload = "auto";
@@ -178,6 +181,20 @@ function playSound(name) {
   }
 }
 
+function updateLandscapeScale() {
+  if (!landscapeLayoutQuery.matches) {
+    document.documentElement.style.removeProperty("--landscape-scale");
+    return;
+  }
+
+  const scale = Math.min(
+    (window.innerWidth - 8) / 1120,
+    (window.innerHeight - 8) / 720,
+    1
+  );
+  document.documentElement.style.setProperty("--landscape-scale", scale.toFixed(4));
+}
+
 function makeOrder() {
   const toppingKeys = Object.keys(toppings);
   const count = Math.random() > 0.72 ? 3 : 2;
@@ -265,6 +282,23 @@ function playReaction(effectEl) {
   effectEl.classList.add("is-playing");
 }
 
+function stopFinishEffect() {
+  if (finishEffectTimer) {
+    clearTimeout(finishEffectTimer);
+    finishEffectTimer = null;
+  }
+  if (!finishEffect) return;
+  finishEffect.classList.remove("is-playing");
+}
+
+function playFinishEffect() {
+  if (!finishEffect) return;
+  stopFinishEffect();
+  void finishEffect.offsetWidth;
+  finishEffect.classList.add("is-playing");
+  finishEffectTimer = setTimeout(stopFinishEffect, 2500);
+}
+
 function showOrder() {
   if (!state.order) {
     orderTitleEl.textContent = "準備中";
@@ -338,6 +372,7 @@ function serve() {
 }
 
 function startGame() {
+  stopFinishEffect();
   playSound("start");
   playBackgroundMusic();
 
@@ -367,6 +402,7 @@ function startGame() {
 
 function endGame() {
   playSound("end");
+  playFinishEffect();
   state.running = false;
   clearInterval(state.timerId);
   state.timerId = null;
@@ -393,6 +429,7 @@ document.querySelectorAll("[data-topping]").forEach((button) => {
 
 serveBtn.addEventListener("click", serve);
 clearBtn.addEventListener("click", () => {
+  stopFinishEffect();
   playSound("clear");
   clearBowl();
   showMessage("碗已清空。");
@@ -408,7 +445,16 @@ document.addEventListener("pointerdown", () => {
 window.addEventListener("pagehide", stopBackgroundMusic);
 window.addEventListener("blur", pauseMusicForFocusLoss);
 window.addEventListener("focus", resumeMusicAfterFocus);
-window.addEventListener("resize", fitSuccessLog);
+window.addEventListener("resize", () => {
+  updateLandscapeScale();
+  fitSuccessLog();
+});
+window.addEventListener("orientationchange", updateLandscapeScale);
+if (landscapeLayoutQuery.addEventListener) {
+  landscapeLayoutQuery.addEventListener("change", updateLandscapeScale);
+} else if (landscapeLayoutQuery.addListener) {
+  landscapeLayoutQuery.addListener(updateLandscapeScale);
+}
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     pauseMusicForFocusLoss();
@@ -447,6 +493,7 @@ window.addEventListener("keydown", (event) => {
 });
 
 previewBroth = randomBroth();
+updateLandscapeScale();
 updateBgmButtonState();
 updateStats();
 updateBowlView();
