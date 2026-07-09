@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>郎拉麵小遊戲</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="game-shell">
+    <section class="counter">
+      <header class="topbar" aria-label="遊戲狀態">
+        <div>
+          <h1>郎拉麵小遊戲</h1>
+          <p class="subtitle">照訂單煮麵，上錯會扣時間。</p>
+        </div>
+        <div class="stats">
+          <div><span>分數</span><strong id="score">0</strong></div>
+          <div><span>連擊</span><strong id="combo">0</strong></div>
+          <div><span>時間</span><strong id="time">75</strong></div>
+        </div>
+      </header>
+
+      <section class="service-line" aria-label="拉麵店櫃台">
+        <div class="customer-panel">
+          <div class="customer" id="customer">
+            <div class="ears"></div>
+            <div class="face">
+              <span class="eye left"></span>
+              <span class="eye right"></span>
+              <span class="mouth"></span>
+            </div>
+          </div>
+          <div class="speech">
+            <span class="label">客人點單</span>
+            <h2 id="orderTitle">準備中</h2>
+            <p id="orderText">按「開始」接第一張單。</p>
+          </div>
+        </div>
+
+        <div class="bowl-area">
+          <div class="steam"><span></span><span></span><span></span></div>
+          <div class="bowl" aria-label="目前拉麵">
+            <div class="broth" id="brothView"></div>
+            <div class="noodles"></div>
+            <div class="topping egg" data-name="egg"></div>
+            <div class="topping pork" data-name="pork"></div>
+            <div class="topping corn" data-name="corn"></div>
+            <div class="topping nori" data-name="nori"></div>
+          </div>
+          <div class="current-order" id="currentOrder">空碗</div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="料理操作">
+        <div class="station">
+          <h3>湯底</h3>
+          <button class="choice" data-broth="miso"><b>1</b>味噌</button>
+          <button class="choice" data-broth="shoyu"><b>2</b>醬油</button>
+          <button class="choice" data-broth="tonkotsu"><b>3</b>豚骨</button>
+        </div>
+        <div class="station">
+          <h3>配料</h3>
+          <button class="choice" data-topping="egg"><b>Q</b>溏心蛋</button>
+          <button class="choice" data-topping="pork"><b>W</b>叉燒</button>
+          <button class="choice" data-topping="corn"><b>E</b>玉米</button>
+          <button class="choice" data-topping="nori"><b>A</b>海苔</button>
+        </div>
+        <div class="station actions">
+          <h3>出餐</h3>
+          <button id="serveBtn" class="serve"><b>Space</b>送出</button>
+          <button id="clearBtn" class="secondary">清空</button>
+          <button id="startBtn" class="start">開始</button>
+        </div>
+      </section>
+
+      <footer class="message" id="message">選好湯底與配料後送出。</footer>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
