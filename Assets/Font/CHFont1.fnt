@@ -1,0 +1,21 @@
+info face="CHFont1" size=107 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=0 aa=1 padding=0,0,0,0 spacing=2,2 outline=0
+common lineHeight=107 base=105 scaleW=1496 scaleH=111 pages=1 packed=0 alphaChnl=1 redChnl=0 greenChnl=0 blueChnl=0
+page id=0 file="CHFont1.png"
+chars count=17
+char id=48 x=2 y=2 width=100 height=107 xoffset=0 yoffset=0 xadvance=103 page=0 chnl=15
+char id=49 x=104 y=2 width=66 height=107 xoffset=0 yoffset=0 xadvance=69 page=0 chnl=15
+char id=50 x=172 y=2 width=90 height=107 xoffset=0 yoffset=0 xadvance=93 page=0 chnl=15
+char id=51 x=264 y=2 width=87 height=107 xoffset=0 yoffset=0 xadvance=90 page=0 chnl=15
+char id=52 x=353 y=2 width=96 height=107 xoffset=0 yoffset=0 xadvance=99 page=0 chnl=15
+char id=53 x=451 y=2 width=89 height=107 xoffset=0 yoffset=0 xadvance=92 page=0 chnl=15
+char id=54 x=542 y=2 width=96 height=107 xoffset=0 yoffset=0 xadvance=99 page=0 chnl=15
+char id=55 x=640 y=2 width=90 height=107 xoffset=0 yoffset=0 xadvance=93 page=0 chnl=15
+char id=56 x=732 y=2 width=91 height=107 xoffset=0 yoffset=0 xadvance=94 page=0 chnl=15
+char id=57 x=825 y=2 width=92 height=107 xoffset=0 yoffset=0 xadvance=95 page=0 chnl=15
+char id=43 x=919 y=2 width=101 height=107 xoffset=0 yoffset=0 xadvance=104 page=0 chnl=15
+char id=45 x=1022 y=2 width=104 height=107 xoffset=0 yoffset=0 xadvance=107 page=0 chnl=15
+char id=120 x=1128 y=2 width=102 height=107 xoffset=0 yoffset=0 xadvance=105 page=0 chnl=15
+char id=47 x=1232 y=2 width=74 height=107 xoffset=0 yoffset=0 xadvance=77 page=0 chnl=15
+char id=61 x=1308 y=2 width=102 height=107 xoffset=0 yoffset=0 xadvance=105 page=0 chnl=15
+char id=44 x=1412 y=2 width=41 height=107 xoffset=0 yoffset=0 xadvance=44 page=0 chnl=15
+char id=46 x=1455 y=2 width=39 height=107 xoffset=0 yoffset=0 xadvance=42 page=0 chnl=15

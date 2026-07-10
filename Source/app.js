@@ -65,6 +65,33 @@ const bgmTracks = [
   "Assets/SE/Ramen%20shop%20music1.mp3",
   "Assets/SE/Ramen%20shop%20music2.mp3"
 ];
+const statBitmapFont = {
+  fnt: "Assets/Font/CHFont1.fnt",
+  image: "Assets/Font/CHFont1.png",
+  lineHeight: 107,
+  scaleW: 1496,
+  scaleH: 111,
+  chars: {
+    "0": { x: 2, y: 2, width: 100, height: 107, xadvance: 103 },
+    "1": { x: 104, y: 2, width: 66, height: 107, xadvance: 69 },
+    "2": { x: 172, y: 2, width: 90, height: 107, xadvance: 93 },
+    "3": { x: 264, y: 2, width: 87, height: 107, xadvance: 90 },
+    "4": { x: 353, y: 2, width: 96, height: 107, xadvance: 99 },
+    "5": { x: 451, y: 2, width: 89, height: 107, xadvance: 92 },
+    "6": { x: 542, y: 2, width: 96, height: 107, xadvance: 99 },
+    "7": { x: 640, y: 2, width: 90, height: 107, xadvance: 93 },
+    "8": { x: 732, y: 2, width: 91, height: 107, xadvance: 94 },
+    "9": { x: 825, y: 2, width: 92, height: 107, xadvance: 95 },
+    "+": { x: 919, y: 2, width: 101, height: 107, xadvance: 104 },
+    "-": { x: 1022, y: 2, width: 104, height: 107, xadvance: 107 },
+    "x": { x: 1128, y: 2, width: 102, height: 107, xadvance: 105 },
+    "/": { x: 1232, y: 2, width: 74, height: 107, xadvance: 77 },
+    "=": { x: 1308, y: 2, width: 102, height: 107, xadvance: 105 },
+    ",": { x: 1412, y: 2, width: 41, height: 107, xadvance: 44 },
+    ".": { x: 1455, y: 2, width: 39, height: 107, xadvance: 42 }
+  }
+};
+const statBitmapScale = 0.32;
 const soundEffects = {
   start: new Audio("Assets/SE/%E5%92%8C%E5%A4%AA%E9%BC%931.mp3"),
   finishStamp: new Audio("Assets/SE/%E5%92%8C%E5%A4%AA%E9%BC%932.mp3"),
@@ -383,10 +410,76 @@ function describeOrder(order) {
   return `${broths[order.broth]} + ${order.toppings.map((key) => toppings[key]).join("、")}`;
 }
 
+function parseFntAttributes(line) {
+  const attributes = {};
+  line.replace(/(\w+)=("[^"]*"|\S+)/g, (_, key, rawValue) => {
+    const value = rawValue.startsWith("\"") ? rawValue.slice(1, -1) : rawValue;
+    attributes[key] = /^-?\d+$/.test(value) ? Number(value) : value;
+    return "";
+  });
+  return attributes;
+}
+
+function loadStatBitmapFont() {
+  if (!window.fetch) return;
+
+  fetch(statBitmapFont.fnt)
+    .then((response) => {
+      if (!response.ok) throw new Error("font not loaded");
+      return response.text();
+    })
+    .then((fontText) => {
+      const lines = fontText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const common = parseFntAttributes(lines.find((line) => line.startsWith("common ")) || "");
+      const page = parseFntAttributes(lines.find((line) => line.startsWith("page ")) || "");
+      const chars = {};
+
+      lines
+        .filter((line) => line.startsWith("char "))
+        .forEach((line) => {
+          const data = parseFntAttributes(line);
+          chars[String.fromCharCode(data.id)] = data;
+        });
+
+      if (Object.keys(chars).length === 17) {
+        statBitmapFont.lineHeight = common.lineHeight || statBitmapFont.lineHeight;
+        statBitmapFont.scaleW = common.scaleW || statBitmapFont.scaleW;
+        statBitmapFont.scaleH = common.scaleH || statBitmapFont.scaleH;
+        statBitmapFont.chars = chars;
+        if (page.file) statBitmapFont.image = `Assets/Font/${page.file}`;
+        updateStats();
+      }
+    })
+    .catch(() => {});
+}
+
+function applyBitmapText(element, value) {
+  const text = String(value);
+  const glyphs = [...text].map((character) => statBitmapFont.chars[character]).filter(Boolean);
+  const naturalWidth = glyphs.reduce((total, glyph) => total + glyph.width, 0) + Math.max(glyphs.length - 1, 0);
+  const availableWidth = Math.max(element.clientWidth - 2, 54);
+  const displayScale = Math.min(statBitmapScale, availableWidth / naturalWidth);
+
+  element.textContent = "";
+  element.setAttribute("aria-label", text);
+  element.dataset.value = text;
+
+  for (const glyph of glyphs) {
+    const glyphEl = document.createElement("span");
+    glyphEl.className = "bitmap-stat-glyph";
+    glyphEl.style.width = `${Math.ceil(glyph.width * displayScale)}px`;
+    glyphEl.style.height = `${Math.ceil(glyph.height * displayScale)}px`;
+    glyphEl.style.backgroundImage = `url("${statBitmapFont.image}")`;
+    glyphEl.style.backgroundSize = `${statBitmapFont.scaleW * displayScale}px ${statBitmapFont.scaleH * displayScale}px`;
+    glyphEl.style.backgroundPosition = `-${glyph.x * displayScale}px -${glyph.y * displayScale}px`;
+    element.appendChild(glyphEl);
+  }
+}
+
 function updateStats() {
-  scoreEl.textContent = state.score;
-  comboEl.textContent = state.combo;
-  timeEl.textContent = state.time;
+  applyBitmapText(scoreEl, state.score);
+  applyBitmapText(comboEl, state.combo);
+  applyBitmapText(timeEl, state.time);
 }
 
 function fitSuccessLog() {
@@ -655,6 +748,7 @@ window.addEventListener("focus", resumeMusicAfterFocus);
 window.addEventListener("resize", () => {
   updateLandscapeScale();
   fitSuccessLog();
+  updateStats();
 });
 window.addEventListener("load", () => {
   updateLandscapeScale();
@@ -714,6 +808,7 @@ window.addEventListener("keydown", (event) => {
 previewBroth = randomBroth();
 setCurtainState("closed");
 hideCountdown();
+loadStatBitmapFont();
 updateLandscapeScale();
 updateBgmButtonState();
 updateStats();
