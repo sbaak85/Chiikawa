@@ -1,13 +1,15 @@
 const broths = {
   miso: "味噌",
   shoyu: "醬油",
-  tonkotsu: "豚骨"
+  tonkotsu: "豚骨",
+  spicy: "麻辣"
 };
 
 const brothImages = {
   miso: "Assets/Miso-bowl.png",
   shoyu: "Assets/soy-sauce-bowl.png",
-  tonkotsu: "Assets/pork-bone-bowl.png"
+  tonkotsu: "Assets/pork-bone-bowl.png",
+  spicy: "Assets/Spicy-bowl.png"
 };
 
 const toppings = {
@@ -794,7 +796,7 @@ window.addEventListener("keydown", (event) => {
   if (event.target.matches("button") && event.key === "Enter") return;
 
   const key = event.key.toLowerCase();
-  const brothMap = { "1": "miso", "2": "shoyu", "3": "tonkotsu" };
+  const brothMap = { "1": "miso", "2": "shoyu", "3": "tonkotsu", "4": "spicy" };
   const toppingMap = { q: "egg", w: "pork", e: "corn", a: "nori" };
 
   if (brothMap[key]) {
