@@ -105,6 +105,15 @@ const curtainOpenMs = 220;
 const curtainCloseMs = 260;
 const finishEffectMs = 2500;
 const landscapeLayoutQuery = window.matchMedia("(orientation: landscape) and (max-height: 560px)");
+const userAgent = navigator.userAgent || "";
+const isIpadLike = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+const isIosDevice = /iP(hone|ad|od)/.test(userAgent) || isIpadLike;
+const isSafari = /Safari/i.test(userAgent) && !/(Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android)/i.test(userAgent);
+const fixedBoardMode = isIosDevice || isSafari;
+
+if (fixedBoardMode) {
+  document.documentElement.classList.add("fixed-board-mode");
+}
 
 Object.values(soundEffects).forEach((audio) => {
   audio.preload = "auto";
@@ -310,6 +319,21 @@ function beginActiveGame(flowId) {
 }
 
 function updateLandscapeScale() {
+  if (fixedBoardMode) {
+    const width = document.documentElement.clientWidth || window.innerWidth || 1120;
+    const height = document.documentElement.clientHeight || window.innerHeight || 720;
+    const scale = Math.min(Math.max((width - 8) / 1120, 0.28), 1);
+    const boardWidth = Math.ceil(1120 * scale);
+    const boardHeight = Math.ceil(744 * scale);
+    const stageHeight = Math.max(height, boardHeight);
+
+    document.documentElement.style.setProperty("--fixed-board-scale", scale.toFixed(4));
+    document.documentElement.style.setProperty("--fixed-board-width", `${boardWidth}px`);
+    document.documentElement.style.setProperty("--fixed-board-height", `${boardHeight}px`);
+    document.documentElement.style.setProperty("--fixed-stage-height", `${stageHeight}px`);
+    return;
+  }
+
   if (!landscapeLayoutQuery.matches) {
     document.documentElement.style.removeProperty("--landscape-scale");
     document.documentElement.style.removeProperty("--landscape-board-width");

@@ -1021,7 +1021,7 @@ button b {
   body {
     width: 100%;
     min-height: 100%;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -1099,4 +1099,107 @@ button b {
   .controls {
     grid-template-columns: 1fr 1.3fr .85fr;
   }
+}
+
+html.fixed-board-mode,
+html.fixed-board-mode body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.fixed-board-mode body {
+  min-height: 100dvh;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+html.fixed-board-mode .game-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: var(--fixed-board-width, 100vw);
+  min-height: var(--fixed-stage-height, 100dvh);
+  padding: 0;
+  overflow: visible;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+html.fixed-board-mode .counter {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1120px;
+  height: 720px;
+  min-height: 0;
+  transform: translateX(-50%) scale(var(--fixed-board-scale, 1));
+  transform-origin: top center;
+}
+
+html.fixed-board-mode .topbar {
+  align-items: center;
+  flex-direction: row;
+}
+
+html.fixed-board-mode h1 {
+  font-size: 54px;
+}
+
+html.fixed-board-mode .stats {
+  min-width: 360px;
+  width: auto;
+}
+
+html.fixed-board-mode .service-line {
+  grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.1fr);
+  padding: 28px 28px 22px;
+}
+
+html.fixed-board-mode .customer-panel {
+  grid-template-columns: 264px 1fr;
+  gap: 8px;
+}
+
+html.fixed-board-mode .customer {
+  width: 273px;
+  height: 294px;
+}
+
+html.fixed-board-mode .speech {
+  width: 426px;
+  height: 359px;
+  min-height: 0;
+  padding: 0;
+}
+
+html.fixed-board-mode .menu-copy {
+  left: 47px;
+  right: 40px;
+  top: 103px;
+}
+
+html.fixed-board-mode .speech-stack {
+  position: absolute;
+  left: 178px;
+  top: 56px;
+  transform: none;
+}
+
+html.fixed-board-mode .order-note {
+  position: absolute;
+  left: 66px;
+  top: 468px;
+  width: 430px;
+  min-height: 78px;
+  margin-top: 0;
+  justify-self: auto;
+}
+
+html.fixed-board-mode .bowl-area {
+  min-height: 340px;
+}
+
+html.fixed-board-mode .controls {
+  grid-template-columns: 1fr 1.3fr .85fr;
 }
