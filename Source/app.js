@@ -59,6 +59,7 @@ const dropEffect = document.querySelector("#dropEffect");
 const finishEffect = document.querySelector("#finishEffect");
 const curtainLayer = document.querySelector("#curtainLayer");
 const countdownOverlay = document.querySelector("#countdownOverlay");
+const counterEl = document.querySelector(".counter");
 const bgMusic = document.querySelector("#bgMusic");
 const bgmTracks = [
   "Assets/SE/Ramen%20shop%20music1.mp3",
@@ -104,6 +105,8 @@ const countdownStepMs = 800;
 const curtainOpenMs = 220;
 const curtainCloseMs = 260;
 const finishEffectMs = 2500;
+const fixedBoardWidth = 1120;
+const fixedBoardFallbackHeight = 1040;
 const landscapeLayoutQuery = window.matchMedia("(orientation: landscape) and (max-height: 560px)");
 const userAgent = navigator.userAgent || "";
 const isIpadLike = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
@@ -322,9 +325,13 @@ function updateLandscapeScale() {
   if (fixedBoardMode) {
     const width = document.documentElement.clientWidth || window.innerWidth || 1120;
     const height = document.documentElement.clientHeight || window.innerHeight || 720;
-    const scale = Math.min(Math.max((width - 8) / 1120, 0.28), 1);
-    const boardWidth = Math.ceil(1120 * scale);
-    const boardHeight = Math.ceil(744 * scale);
+    const designHeight = Math.max(counterEl?.scrollHeight || fixedBoardFallbackHeight, fixedBoardFallbackHeight);
+    const widthScale = Math.min((width - 8) / fixedBoardWidth, 1);
+    const heightScale = Math.min((height - 8) / designHeight, 1);
+    const landscapeScale = Math.min(widthScale, Math.max(heightScale, 0.48));
+    const scale = Math.max(width > height ? landscapeScale : widthScale, 0.28);
+    const boardWidth = Math.ceil(fixedBoardWidth * scale);
+    const boardHeight = Math.ceil(designHeight * scale) + 28;
     const stageHeight = Math.max(height, boardHeight);
 
     document.documentElement.style.setProperty("--fixed-board-scale", scale.toFixed(4));
@@ -344,9 +351,10 @@ function updateLandscapeScale() {
 
   const width = window.innerWidth || document.documentElement.clientWidth || 1120;
   const height = window.innerHeight || document.documentElement.clientHeight || 720;
-  const scale = Math.min((width - 8) / 1120, 1);
-  const boardWidth = Math.ceil(1120 * scale);
-  const boardHeight = Math.ceil(744 * scale);
+  const designHeight = Math.max(counterEl?.scrollHeight || fixedBoardFallbackHeight, fixedBoardFallbackHeight);
+  const scale = Math.min((width - 8) / fixedBoardWidth, 1);
+  const boardWidth = Math.ceil(fixedBoardWidth * scale);
+  const boardHeight = Math.ceil(designHeight * scale) + 28;
   const stageHeight = Math.max(height, boardHeight);
 
   document.documentElement.style.setProperty("--landscape-scale", scale.toFixed(4));
@@ -648,11 +656,19 @@ window.addEventListener("resize", () => {
   updateLandscapeScale();
   fitSuccessLog();
 });
+window.addEventListener("load", () => {
+  updateLandscapeScale();
+  fitSuccessLog();
+});
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", updateLandscapeScale);
   window.visualViewport.addEventListener("scroll", updateLandscapeScale);
 }
 window.addEventListener("orientationchange", updateLandscapeScale);
+if ("ResizeObserver" in window && counterEl) {
+  const fixedBoardObserver = new ResizeObserver(updateLandscapeScale);
+  fixedBoardObserver.observe(counterEl);
+}
 if (landscapeLayoutQuery.addEventListener) {
   landscapeLayoutQuery.addEventListener("change", updateLandscapeScale);
 } else if (landscapeLayoutQuery.addListener) {

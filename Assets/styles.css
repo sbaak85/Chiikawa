@@ -1047,8 +1047,9 @@ button b {
     left: 50%;
     top: 0;
     width: 1120px;
-    height: 720px;
+    height: auto;
     min-height: 0;
+    grid-template-rows: auto auto auto auto;
     transform: translateX(-50%) scale(var(--landscape-scale, 1));
     transform-origin: top center;
   }
@@ -1131,8 +1132,9 @@ html.fixed-board-mode .counter {
   left: 50%;
   top: 0;
   width: 1120px;
-  height: 720px;
+  height: auto;
   min-height: 0;
+  grid-template-rows: auto auto auto auto;
   transform: translateX(-50%) scale(var(--fixed-board-scale, 1));
   transform-origin: top center;
 }
