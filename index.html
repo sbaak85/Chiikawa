@@ -24,6 +24,14 @@
       <section class="service-line" aria-label="拉麵店櫃台">
         <img id="finishEffect" class="finish-effect" src="Assets/完食.png" alt="" aria-hidden="true">
 
+        <div id="curtainLayer" class="curtain-layer is-closed" aria-hidden="true">
+          <div class="curtain-stage">
+            <img class="curtain-panel curtain-left" src="Assets/布簾-拉.png" alt="">
+            <img class="curtain-panel curtain-right" src="Assets/布簾-麵.png" alt="">
+          </div>
+          <div id="countdownOverlay" class="countdown-overlay"></div>
+        </div>
+
         <div class="success-log" id="successLog" aria-label="成功出餐紀錄">
           <div class="success-log-track" id="successLogTrack"></div>
         </div>
@@ -35,11 +43,18 @@
           </div>
           <div class="speech-stack">
             <div class="speech">
-              <span class="label">客人點單</span>
-              <h2 id="orderTitle">準備中</h2>
-              <p id="orderText">按「開始」接第一張單。</p>
+              <img class="menu-board" src="Assets/menu.png" alt="" aria-hidden="true">
+              <div class="menu-copy">
+                <span class="label">客人點單</span>
+                <h2 id="orderTitle">準備中</h2>
+                <p id="orderTalk">閒談訊息...</p>
+              </div>
             </div>
           </div>
+        </div>
+
+        <div class="order-note" aria-live="polite">
+          <p id="orderText">按「開始」接第一張單。</p>
         </div>
 
         <img class="chopsticks-holder" src="Assets/Chopsticks-display.png" alt="筷子筒">
